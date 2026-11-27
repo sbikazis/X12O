@@ -1,0 +1,23 @@
+name: Flutter quality
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Android platform scaffold
+        run: bash scripts/bootstrap_android.sh
+      - name: Analyze
+        run: flutter analyze
+      - name: Test
+        run: flutter test --reporter expanded
