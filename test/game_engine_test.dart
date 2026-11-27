@@ -29,6 +29,7 @@ void main() {
     test('counts crossed lines separately', () {
       final board = List<Mark?>.filled(144, null);
       const center = 65;
+      board[center] = Mark.x;
       board[center - 1] = Mark.x; board[center + 1] = Mark.x;
       board[center - 12] = Mark.x; board[center + 12] = Mark.x;
       expect(GameEngine.pointsForMove(board, center, Mark.x), 2);
