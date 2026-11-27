@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../app.dart';
 import '../game/arena_engine.dart';
 import '../game/arena_abilities.dart';
-import '../game/game_engine.dart';
 import '../game/game_state.dart';
 
 class ArenaScreen extends StatefulWidget {
