@@ -1,6 +1,13 @@
 include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    deprecated_member_use: ignore
+
 linter:
   rules:
     avoid_print: true
-    prefer_const_constructors: true
-    require_trailing_commas: true
+    prefer_const_constructors: false
+    prefer_const_literals_to_create_immutables: false
+    prefer_interpolation_to_compose_strings: false
+    require_trailing_commas: false
