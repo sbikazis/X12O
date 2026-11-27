@@ -1,4 +1,5 @@
 import 'game_engine.dart';
+import 'arena_abilities.dart';
 import 'game_state.dart';
 
 class ArenaState {
@@ -12,7 +13,7 @@ class ArenaState {
 }
 abstract final class ArenaEngine {
   static const maxEnergy=6;
-  static int _regen(int n)=>(n+1).clamp(0,maxEnergy);
+  static int _regen(int n)=>(n+1).clamp(0,maxEnergy).toInt();
   static ArenaState play(ArenaState s,int i) {
     final g=s.game;
     if(g.finished) throw StateError('Match has finished.');
