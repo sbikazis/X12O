@@ -42,10 +42,13 @@ abstract final class ArenaRules {
       case ArenaAbility.erase:
       case ArenaAbility.swap:
         if (board[index] != currentPlayer.other) throw StateError('Choose an unprotected opponent mark.');
+        break;
       case ArenaAbility.shield:
         if (board[index] != currentPlayer) throw StateError('Shield one of your own marks.');
+        break;
       case ArenaAbility.block:
         if (board[index] != null) throw StateError('Only an empty cell can be blocked.');
+        break;
       case ArenaAbility.doubleMove:
       case ArenaAbility.scanner:
         break;
