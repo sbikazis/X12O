@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app.dart';
 import 'game_screen.dart';
+import 'arena_screen.dart';
 import 'rules_screen.dart';
 import 'profile_screen.dart';
 
@@ -52,7 +53,7 @@ class HomeScreen extends StatelessWidget {
           const Text('YOUR ARENA', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.6, fontSize: 12)),
           const SizedBox(height: 13),
           Row(children: [
-            Expanded(child: _ModeCard(icon: Icons.bolt_rounded, title: 'ARENA', subtitle: 'Abilities & tactics', tint: Palette.coral, onTap: () => _open(context, const GameScreen()))),
+            Expanded(child: _ModeCard(icon: Icons.bolt_rounded, title: 'ARENA', subtitle: 'Abilities & tactics', tint: Palette.coral, onTap: () => _open(context, const ArenaScreen()))),
             const SizedBox(width: 12),
             Expanded(child: _ModeCard(icon: Icons.people_alt_outlined, title: 'LOCAL DUEL', subtitle: 'Two players, one phone', tint: Palette.cyan, onTap: () => _open(context, const GameScreen()))),
           ]),
