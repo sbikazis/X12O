@@ -28,3 +28,7 @@ class GameState {
     return xScore > oScore ? Mark.x : Mark.o;
   }
 }
+
+extension NullableMarkInfo on Mark? {
+  String get symbol => this == Mark.x ? 'X' : this == Mark.o ? 'O' : '';
+}
