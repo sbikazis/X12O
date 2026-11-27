@@ -30,7 +30,7 @@ abstract final class ArenaEngine {
     final g=s.game; if(g.finished) throw StateError('Match has finished.');
     final p=g.turn, energy=s.energyFor(p);
     if(energy<a.cost) throw StateError('Not enough energy.');
-    final board=List<Mark?>.of(g.board), shield=Set<int>.of(s.protectedCells), blocked=Set<int>.of(s.blockedCells);
+    final board=List<Mark?>.of(g.board), shield=Set<int>.of(s.protectedCells), blocked=Set<int>.of(s.blockedCells);\n    var moveCount=g.moves;
     var bonus=s.doubleMoveFor; var hints=<int>{};
     if(a==ArenaAbility.scanner) {
       for(var i=0;i<GameEngine.cells;i++) { if(board[i]!=null) continue; final b=List<Mark?>.of(board)..[i]=p.other; if(GameEngine.pointsForMove(b,i,p.other)>0) hints.add(i); }
@@ -39,7 +39,7 @@ abstract final class ArenaEngine {
       if(target==null||target<0||target>=GameEngine.cells) throw RangeError('Invalid target.');
       if(shield.contains(target)||blocked.contains(target)) throw StateError('Cell is protected or blocked.');
       switch(a) {
-        case ArenaAbility.erase: if(board[target]!=p.other) throw StateError('Choose an opponent mark.'); board[target]=null; break;
+        case ArenaAbility.erase: if(board[target]!=p.other) throw StateError('Choose an opponent mark.'); board[target]=null; moveCount--; break;
         case ArenaAbility.shield: if(board[target]!=p) throw StateError('Choose your own mark.'); shield.add(target); break;
         case ArenaAbility.block: if(board[target]!=null) throw StateError('Choose an empty cell.'); blocked.add(target); break;
         case ArenaAbility.swap: if(board[target]!=p.other) throw StateError('Choose an opponent mark.'); board[target]=p; break;
@@ -47,7 +47,7 @@ abstract final class ArenaEngine {
       }
     }
     final remaining=energy-a.cost;
-    return ArenaState(game:GameState(board:board,turn:p.other,xScore:g.xScore,oScore:g.oScore,moves:g.moves,finished:false,lastMove:g.lastMove),
+    return ArenaState(game:GameState(board:board,turn:p.other,xScore:g.xScore,oScore:g.oScore,moves:moveCount,finished:false,lastMove:g.lastMove),
       xEnergy:p==Mark.x?remaining:s.xEnergy,oEnergy:p==Mark.o?remaining:s.oEnergy,protectedCells:shield,blockedCells:blocked,doubleMoveFor:bonus,scannerHints:hints);
   }
 }
