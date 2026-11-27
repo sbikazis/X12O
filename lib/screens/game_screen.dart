@@ -76,7 +76,7 @@ class _GameScreenState extends State<GameScreen> {
         Row(children: [
           Expanded(child: _Score(mark: Mark.x, score: state.xScore, active: xTurn && !state.finished)),
           const SizedBox(width: 9),
-          Expanded(child: _Score(mark: Mark.o, score: state.oScore, active: !xTurn && !state.finished)),
+          Expanded(child: _Score(mark: Mark.o, score: state.oScore, active: !xTurn && !state.finished, isAi: widget.vsAi)),
         ]),
         const SizedBox(height: 12),
         Container(width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 13),
@@ -120,8 +120,8 @@ class _GameScreenState extends State<GameScreen> {
 }
 
 class _Score extends StatelessWidget {
-  const _Score({required this.mark, required this.score, required this.active});
-  final Mark mark; final int score; final bool active;
+  const _Score({required this.mark, required this.score, required this.active, this.isAi = false});
+  final Mark mark; final int score; final bool active; final bool isAi;
   @override
   Widget build(BuildContext context) {
     final tint = mark == Mark.x ? Palette.cyan : Palette.coral;
@@ -132,7 +132,7 @@ class _Score extends StatelessWidget {
         Text(mark.symbol, style: TextStyle(color: tint, fontSize: 25, fontWeight: FontWeight.w900)),
         const SizedBox(width: 10),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(widget.vsAi && mark == Mark.o ? 'X12O AI' : 'PLAYER ' + mark.symbol, style: const TextStyle(color: Palette.muted, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .7)),
+          Text(isAi && mark == Mark.o ? 'X12O AI' : 'PLAYER ' + mark.symbol, style: const TextStyle(color: Palette.muted, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .7)),
           Text(score.toString(), style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900, height: 1.1)),
         ])),
         if (active) Icon(Icons.circle, size: 7, color: tint),
