@@ -58,7 +58,7 @@ class HomeScreen extends StatelessWidget {
           ]),
           const SizedBox(height: 12),
           Row(children: [
-            Expanded(child: _ModeCard(icon: Icons.auto_awesome_rounded, title: 'DAILY RUN', subtitle: 'A fresh challenge', tint: Palette.gold, onTap: () => _open(context, const GameScreen()))),
+            Expanded(child: _ModeCard(icon: Icons.psychology_alt_rounded, title: 'AI CHALLENGE', subtitle: 'Face the X12O brain', tint: Palette.gold, onTap: () => _open(context, const GameScreen(vsAi: true)))),
             const SizedBox(width: 12),
             Expanded(child: _ModeCard(icon: Icons.menu_book_rounded, title: 'HOW TO PLAY', subtitle: 'Master the rules', tint: Colors.white, onTap: () => _open(context, const RulesScreen()))),
           ]),
