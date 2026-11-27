@@ -9,10 +9,17 @@ void main() {
       board[0] = Mark.x; board[1] = Mark.x; board[2] = Mark.x;
       expect(GameEngine.pointsForMove(board, 2, Mark.x), 1);
     });
-    test('counts overlapping triples in a run of four', () {
-      final board = List<Mark?>.filled(144, null);
-      for (var i = 0; i < 4; i++) { board[i] = Mark.o; }
-      expect(GameEngine.pointsForMove(board, 3, Mark.o), 2);
+    test('scores each newly completed window as a run grows to four', () {
+      var state = GameState();
+      state = GameEngine.play(state, 0);   // X
+      state = GameEngine.play(state, 24);  // O
+      state = GameEngine.play(state, 1);   // X
+      state = GameEngine.play(state, 25);  // O
+      state = GameEngine.play(state, 2);   // X completes first window
+      expect(state.xScore, 1);
+      state = GameEngine.play(state, 26);  // O
+      state = GameEngine.play(state, 3);   // X completes the second window
+      expect(state.xScore, 2);
     });
     test('counts diagonal triples', () {
       final board = List<Mark?>.filled(144, null);
