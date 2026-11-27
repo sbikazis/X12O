@@ -1,25 +1,45 @@
 import 'package:flutter/material.dart';
 import '../app.dart';
+import '../game/ai_opponent.dart';
 import '../game/game_engine.dart';
 import '../game/game_state.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  const GameScreen({super.key, this.vsAi = false});
+  final bool vsAi;
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
   GameState state = GameState();
+  bool aiThinking = false;
 
   void _move(int index) {
-    if (state.finished || state.board[index] != null) return;
+    if (state.finished || state.board[index] != null || aiThinking || (widget.vsAi && state.turn == Mark.o)) return;
     setState(() => state = GameEngine.play(state, index));
     if (state.finished) {
       Future<void>.delayed(const Duration(milliseconds: 420), () {
         if (mounted) _result();
       });
+    } else if (widget.vsAi && state.turn == Mark.o) {
+      _scheduleAiMove();
     }
+  }
+
+  void _scheduleAiMove() {
+    setState(() => aiThinking = true);
+    Future<void>.delayed(const Duration(milliseconds: 520), () {
+      if (!mounted || state.finished || state.turn != Mark.o) return;
+      final index = AiOpponent.chooseMove(state, difficulty: AiDifficulty.hard);
+      setState(() {
+        state = GameEngine.play(state, index);
+        aiThinking = false;
+      });
+      if (state.finished) {
+        Future<void>.delayed(const Duration(milliseconds: 420), () { if (mounted) _result(); });
+      }
+    });
   }
 
   void _result() {
@@ -49,8 +69,8 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
-        title: const Text('CLASSIC MATCH', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.7)),
-        actions: [IconButton(onPressed: () => setState(() => state = GameState()), icon: const Icon(Icons.refresh_rounded), tooltip: 'Restart')],
+        title: Text(widget.vsAi ? 'AI CHALLENGE' : 'CLASSIC MATCH', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.7)),
+        actions: [IconButton(onPressed: () => setState(() { state = GameState(); aiThinking = false; }), icon: const Icon(Icons.refresh_rounded), tooltip: 'Restart')],
       ),
       body: SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(13, 4, 13, 12), child: Column(children: [
         Row(children: [
@@ -112,7 +132,7 @@ class _Score extends StatelessWidget {
         Text(mark.symbol, style: TextStyle(color: tint, fontSize: 25, fontWeight: FontWeight.w900)),
         const SizedBox(width: 10),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('PLAYER ' + mark.symbol, style: const TextStyle(color: Palette.muted, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .7)),
+          Text(widget.vsAi && mark == Mark.o ? 'X12O AI' : 'PLAYER ' + mark.symbol, style: const TextStyle(color: Palette.muted, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .7)),
           Text(score.toString(), style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900, height: 1.1)),
         ])),
         if (active) Icon(Icons.circle, size: 7, color: tint),
