@@ -10,6 +10,7 @@ class ArenaState {
     Set<int> protectedCells = const {},
     Set<int> blockedCells = const {},
     this.doubleMoveFor,
+    this.scannerPenaltyFor,
     Set<int> scannerHints = const {},
   })  : game = game ?? GameState(),
         protectedCells = Set.unmodifiable(protectedCells),
@@ -22,6 +23,7 @@ class ArenaState {
   final Set<int> protectedCells;
   final Set<int> blockedCells;
   final Mark? doubleMoveFor;
+  final Mark? scannerPenaltyFor;
   final Set<int> scannerHints;
 
   int energyFor(Mark mark) => mark == Mark.x ? xEnergy : oEnergy;
@@ -51,6 +53,7 @@ abstract final class ArenaEngine {
     final player = game.turn;
     final played = GameEngine.play(game, index);
     final earnsBonusTurn = state.doubleMoveFor == player && !played.finished;
+    final scannerPenaltyApplies = state.scannerPenaltyFor == player;
     final finished = played.finished ||
         _boardIsClosed(played.board, state.blockedCells);
 
@@ -66,12 +69,13 @@ abstract final class ArenaEngine {
 
     return ArenaState(
       game: nextGame,
-      xEnergy: player == Mark.x ? _regenerate(state.xEnergy) : state.xEnergy,
-      oEnergy: player == Mark.o ? _regenerate(state.oEnergy) : state.oEnergy,
+      xEnergy: player == Mark.x && !scannerPenaltyApplies ? _regenerate(state.xEnergy) : state.xEnergy,
+      oEnergy: player == Mark.o && !scannerPenaltyApplies ? _regenerate(state.oEnergy) : state.oEnergy,
       protectedCells: state.protectedCells,
       blockedCells: state.blockedCells,
       // The bonus is consumed by the first of the two consecutive placements.
       doubleMoveFor: earnsBonusTurn ? null : (finished ? null : state.doubleMoveFor),
+      scannerPenaltyFor: scannerPenaltyApplies ? null : state.scannerPenaltyFor,
     );
   }
 
@@ -104,6 +108,7 @@ abstract final class ArenaEngine {
         protectedCells: state.protectedCells,
         blockedCells: state.blockedCells,
         doubleMoveFor: state.doubleMoveFor,
+        scannerPenaltyFor: player,
         scannerHints: hints,
       );
     }
@@ -172,6 +177,7 @@ abstract final class ArenaEngine {
       protectedCells: protected,
       blockedCells: blocked,
       doubleMoveFor: finished ? null : bonus,
+      scannerPenaltyFor: state.scannerPenaltyFor,
     );
   }
 }
