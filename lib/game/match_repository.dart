@@ -165,6 +165,8 @@ abstract final class MatchRepository {
     final matches=totals['matches']??0,wins=totals['wins']??0,losses=totals['losses']??0;
     final draws=totals['draws']??0,points=totals['points']??0,best=totals['best']??0,xp=totals['xp']??0;
     final level=xp~/100+1;
+    final streak=_readStreak(prefs.getString(_streakKey));
+    final bestDailyStreak=(streak?['best'] as num?)?.toInt() ?? 0;
     final achievements=<Achievement>[
       Achievement('FIRST MATCH','Complete your first match',matches>=1),
       Achievement('RISING RIVAL','Complete 5 matches',matches>=5),
@@ -172,6 +174,8 @@ abstract final class MatchRepository {
       Achievement('FIRST VICTORY','Win your first match',wins>=1),
       Achievement('DOMINATOR','Win 5 matches',wins>=5),
       Achievement('CENTURY','Score 100 total points',points>=100),
+      Achievement('WEEK WARRIOR','Maintain a 7-day daily streak',bestDailyStreak>=7),
+      Achievement('UNSTOPPABLE','Maintain a 30-day daily streak',bestDailyStreak>=30),
     ];
     return PlayerStats(matches,wins,losses,draws,points,best,List.unmodifiable(recent),
       xp:xp,level:level,levelProgress:xp%100,achievements:List.unmodifiable(achievements));
