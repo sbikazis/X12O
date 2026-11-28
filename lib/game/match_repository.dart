@@ -8,7 +8,7 @@ class MatchRecord {
   final int xScore, oScore, moves;
   final DateTime playedAt;
   Mark? get winner => xScore == oScore ? null : xScore > oScore ? Mark.x : Mark.o;
-  int get xpEarned => (winner == Mark.x ? 60 : winner == null ? 35 : 20) + xScore.clamp(0, 20) * 2;
+  int get xpEarned => (winner == Mark.x ? 60 : winner == null ? 35 : 20) + xScore.clamp(0, 20).toInt() * 2;
   Map<String,Object> toJson()=>{'mode':mode,'x':xScore,'o':oScore,'moves':moves,'at':playedAt.toIso8601String()};
   factory MatchRecord.fromJson(Map<String,dynamic> json)=>MatchRecord(
     mode:json['mode'] as String? ?? 'Classic',
