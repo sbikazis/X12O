@@ -30,7 +30,7 @@ abstract final class MatchRepository {
   static Future<List<MatchRecord>> history() async {
     final prefs=await SharedPreferences.getInstance();
     final raw=prefs.getString(_key);
-    if(raw==null||raw.isEmpty)return const [];
+    if(raw==null||raw.isEmpty) { return const []; }
     try {
       final decoded=jsonDecode(raw) as List<dynamic>;
       return decoded.map((e)=>MatchRecord.fromJson(Map<String,dynamic>.from(e as Map))).toList();
