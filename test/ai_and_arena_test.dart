@@ -16,6 +16,13 @@ void main() {
       final state = GameState(board: board, turn: Mark.o, moves: 2);
       expect(AiOpponent.chooseMove(state, difficulty: AiDifficulty.hard), 62);
     });
+    test('hard AI blocks an immediate opponent scoring move', () {
+      final board = List<Mark?>.filled(144, null)
+        ..[60] = Mark.x
+        ..[61] = Mark.x;
+      final state = GameState(board: board, turn: Mark.o, moves: 2);
+      expect(AiOpponent.chooseMove(state, difficulty: AiDifficulty.hard), 62);
+    });
     test('never chooses an occupied cell', () {
       final state = GameEngine.play(GameState(), 65);
       final move = AiOpponent.chooseMove(state);
