@@ -78,6 +78,13 @@ void main(){
    expect(current.currentStreak,0);
    expect(current.bestStreak,7);
   });
+  test('unlocks daily streak achievements from the personal best',()async{
+   final prefs=await SharedPreferences.getInstance();
+   await prefs.setString('x12o.daily_streak.v1',jsonEncode({'lastDate':'2026-11-28','current':7,'best':30}));
+   final stats=await MatchRepository.stats();
+   expect(stats.achievements[6].unlocked,isTrue);
+   expect(stats.achievements[7].unlocked,isTrue);
+  });
   test('clears local history',()async{
    await MatchRepository.record(mode:'test',xScore:1,oScore:0,moves:144);
    await MatchRepository.clear();
