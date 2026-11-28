@@ -3,6 +3,7 @@ import '../app.dart';
 import '../game/ai_opponent.dart';
 import '../game/game_engine.dart';
 import '../game/game_state.dart';
+import '../game/match_repository.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key, this.vsAi = false});
@@ -14,6 +15,8 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   GameState state = GameState();
   bool aiThinking = false;
+  bool _recorded = false;
+  AiDifficulty difficulty = AiDifficulty.medium;
 
   void _move(int index) {
     if (state.finished || state.board[index] != null || aiThinking || (widget.vsAi && state.turn == Mark.o)) return;
@@ -31,7 +34,7 @@ class _GameScreenState extends State<GameScreen> {
     setState(() => aiThinking = true);
     Future<void>.delayed(const Duration(milliseconds: 520), () {
       if (!mounted || state.finished || state.turn != Mark.o) return;
-      final index = AiOpponent.chooseMove(state, difficulty: AiDifficulty.hard);
+      final index = AiOpponent.chooseMove(state, difficulty: difficulty);
       setState(() {
         state = GameEngine.play(state, index);
         aiThinking = false;
@@ -42,7 +45,12 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  void _result() {
+  Future<void> _result() async {
+    if (!_recorded) {
+      _recorded = true;
+      await MatchRepository.record(mode: widget.vsAi ? 'AI / ' + difficulty.name : 'Classic local', xScore: state.xScore, oScore: state.oScore, moves: state.moves);
+    }
+    if (!mounted) return;
     final title = state.winner == null ? 'A PERFECT DRAW' : 'PLAYER ' + state.winner!.symbol + ' WINS';
     showDialog<void>(context: context, barrierDismissible: false, builder: (dialogContext) => AlertDialog(
       backgroundColor: Palette.panel,
@@ -56,7 +64,7 @@ class _GameScreenState extends State<GameScreen> {
         const Text('The board is full. Every line counted.', textAlign: TextAlign.center, style: TextStyle(color: Palette.muted, fontSize: 12)),
       ]),
       actions: [
-        FilledButton(onPressed: () { Navigator.pop(dialogContext); setState(() => state = GameState()); }, child: const Text('PLAY AGAIN')),
+        FilledButton(onPressed: () { Navigator.pop(dialogContext); setState(() { state = GameState(); _recorded = false; aiThinking = false; }); }, child: const Text('PLAY AGAIN')),
         TextButton(onPressed: () { Navigator.pop(dialogContext); Navigator.pop(context); }, child: const Text('HOME')),
       ],
     ));
@@ -70,7 +78,15 @@ class _GameScreenState extends State<GameScreen> {
       appBar: AppBar(
         leading: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
         title: Text(widget.vsAi ? 'AI CHALLENGE' : 'CLASSIC MATCH', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.7)),
-        actions: [IconButton(onPressed: () => setState(() { state = GameState(); aiThinking = false; }), icon: const Icon(Icons.refresh_rounded), tooltip: 'Restart')],
+        actions: [
+          if (widget.vsAi) PopupMenuButton<AiDifficulty>(
+            tooltip: 'AI difficulty',
+            icon: const Icon(Icons.tune_rounded),
+            onSelected: (value) => setState(() { difficulty = value; state = GameState(); _recorded = false; aiThinking = false; }),
+            itemBuilder: (_) => AiDifficulty.values.map((d) => PopupMenuItem(value: d, child: Text(d.name.toUpperCase() + (d == difficulty ? '  ✓' : '')))).toList(),
+          ),
+          IconButton(onPressed: () => setState(() { state = GameState(); _recorded = false; aiThinking = false; }), icon: const Icon(Icons.refresh_rounded), tooltip: 'Restart'),
+        ],
       ),
       body: SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(13, 4, 13, 12), child: Column(children: [
         Row(children: [
@@ -85,7 +101,7 @@ class _GameScreenState extends State<GameScreen> {
             Container(width: 7, height: 7, decoration: BoxDecoration(shape: BoxShape.circle, color: xTurn ? Palette.cyan : Palette.coral)),
             const SizedBox(width: 9),
             Expanded(child: Text(state.finished ? 'MATCH COMPLETE' : 'PLAYER ' + state.turn.symbol + ' — YOUR MOVE', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1))),
-            Text(state.moves.toString() + '/144 MOVES', style: const TextStyle(color: Palette.muted, fontSize: 9, fontWeight: FontWeight.w800)),
+            Text(widget.vsAi ? difficulty.name.toUpperCase() + ' · ' + state.moves.toString() + '/144' : state.moves.toString() + '/144 MOVES', style: const TextStyle(color: Palette.muted, fontSize: 9, fontWeight: FontWeight.w800)),
           ]),
         ),
         const SizedBox(height: 12),
