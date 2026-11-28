@@ -33,10 +33,10 @@ Install Flutter and Android SDK, then run:
     flutter run
 
 ## Roadmap
-1. **Foundation:** playable Classic, Arena and offline AI modes, scoring engine, rules, profile and CI.
-2. **Game feel:** line-completion effects, haptics, sound controls, onboarding and accessibility.
-3. **Retention:** daily challenges, achievements, richer progression, match analysis and Arena balance simulations.
-4. **Social:** private rooms, invitations, matchmaking, server-authoritative matches and ranked seasons.
-5. **Release:** Arabic, English and French localization, privacy disclosures, store assets and device QA.
+1. **Foundation — implemented:** Classic, Arena and offline AI, scoring engine, rules, local profile and CI.
+2. **Game feel — in progress:** scoring feedback, haptics and tactical feedback are implemented; sound controls, onboarding and accessibility polish remain.
+3. **Retention — in progress:** daily missions, XP, achievements and persistent streaks are implemented; match analysis and Arena balance simulations remain.
+4. **Social — not active:** private rooms, invitations, matchmaking, server-authoritative matches and ranked seasons.
+5. **Release — not active:** Arabic, English and French localization, privacy disclosures, store assets and real-device QA.
 
 Online multiplayer, private rooms, matchmaking and online rankings are not active yet. Daily challenges currently run locally on the device.
