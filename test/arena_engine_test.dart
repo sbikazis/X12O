@@ -154,7 +154,7 @@ void main() {
     test('invalid targets do not spend energy or change the source state', () {
       final state = ArenaState(
         game: GameState(
-          board: List<Mark?>.filled(144, null)..[0] = Mark.x,
+          board: List<Mark?>.filled(144, null)..[0] = Mark.o,
           turn: Mark.o,
           moves: 1,
         ),
