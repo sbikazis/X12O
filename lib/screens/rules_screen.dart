@@ -45,7 +45,7 @@ class RulesScreen extends StatelessWidget {
         _Rule('2', 'BLOCK', 'Cost: 2 energy. Permanently close one empty cell. A blocked cell cannot be played.'),
         _Rule('4', 'SWAP', 'Cost: 4 energy. Turn one unshielded opponent mark into your mark.'),
         _Rule('5', 'DOUBLE MOVE', 'Cost: 5 energy. Your opponent takes their next normal turn; then you get two consecutive placements. An opponent cannot overwrite an armed bonus.'),
-        _Rule('1', 'SCANNER', 'Cost: 1 energy. Reveal empty cells where your opponent could score immediately. Scanning does not pass your turn.'),
+        _Rule('1', 'SCANNER', 'Cost: 1 energy. Reveal empty cells where your opponent could score immediately. Scanning does not pass your turn, but your next placement will not restore energy.'),
         SizedBox(height: 8),
         Text(
           'Arena ends when every cell is occupied or blocked. The player with the higher score wins. Use energy carefully: every ability has an opportunity cost.',
