@@ -11,7 +11,8 @@ void main(){
    await MatchRepository.record(mode:'Classic local',xScore:4,oScore:2,moves:144,playedAt:DateTime(2026,11,28));
    final stats=await MatchRepository.stats();
    expect(stats.matches,1);expect(stats.wins,1);expect(stats.losses,0);expect(stats.points,4);expect(stats.winRate,100);
-   expect(stats.xp,68+(4>=challenge.targetScore?50:0));expect(stats.level,1);expect(stats.levelProgress,68);
+   final bonus=4>=challenge.targetScore?50:0;
+   expect(stats.xp,68+bonus);expect(stats.level,1);expect(stats.levelProgress,68+bonus);
    expect(stats.achievements.first.unlocked,isTrue);
    expect(stats.achievements[3].unlocked,isTrue);
    expect(stats.recent.single.mode,'Classic local');
