@@ -30,7 +30,8 @@ abstract final class ArenaEngine {
     final g=s.game; if(g.finished) throw StateError('Match has finished.');
     final p=g.turn, energy=s.energyFor(p);
     if(energy<a.cost) throw StateError('Not enough energy.');
-    final board=List<Mark?>.of(g.board), shield=Set<int>.of(s.protectedCells), blocked=Set<int>.of(s.blockedCells);\n    var moveCount=g.moves;
+    final board=List<Mark?>.of(g.board), shield=Set<int>.of(s.protectedCells), blocked=Set<int>.of(s.blockedCells);
+    var moveCount=g.moves;
     var bonus=s.doubleMoveFor; var hints=<int>{};
     if(a==ArenaAbility.scanner) {
       for(var i=0;i<GameEngine.cells;i++) { if(board[i]!=null) continue; final b=List<Mark?>.of(board)..[i]=p.other; if(GameEngine.pointsForMove(b,i,p.other)>0) hints.add(i); }
