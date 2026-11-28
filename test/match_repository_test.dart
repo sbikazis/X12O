@@ -12,7 +12,7 @@ void main(){
    final stats=await MatchRepository.stats();
    expect(stats.matches,1);expect(stats.wins,1);expect(stats.losses,0);expect(stats.points,4);expect(stats.winRate,100);
    final bonus=4>=challenge.targetScore?50:0;
-   expect(stats.xp,68+bonus);expect(stats.level,1);expect(stats.levelProgress,68+bonus);
+   expect(stats.xp,68+bonus);expect(stats.level,(68+bonus)~/100+1);expect(stats.levelProgress,(68+bonus)%100);
    expect(stats.achievements.first.unlocked,isTrue);
    expect(stats.achievements[3].unlocked,isTrue);
    expect(stats.recent.single.mode,'Classic local');
