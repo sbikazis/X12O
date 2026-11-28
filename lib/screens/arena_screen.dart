@@ -3,6 +3,7 @@ import '../app.dart';
 import '../game/arena_engine.dart';
 import '../game/arena_abilities.dart';
 import '../game/game_state.dart';
+import '../game/match_repository.dart';
 
 class ArenaScreen extends StatefulWidget {
  const ArenaScreen({super.key});
@@ -12,6 +13,7 @@ class _ArenaScreenState extends State<ArenaScreen>{
  ArenaState state=ArenaState();
  ArenaAbility? selected;
  bool targeting=false;
+ bool _recorded=false;
  Color tint(Mark m)=>m==Mark.x?Palette.cyan:Palette.coral;
  void message(String s){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(s),duration:const Duration(seconds:2)));}
  void ability(ArenaAbility a){
@@ -21,8 +23,11 @@ class _ArenaScreenState extends State<ArenaScreen>{
   }else{setState((){selected=a;targeting=true;});message('Choose a target cell.');}
  }
  void cell(int i){
-  try{setState(()=>state=targeting?ArenaEngine.useAbility(state,selected!,target:i):ArenaEngine.play(state,i));selected=null;targeting=false;}
-  catch(e){message(e.toString().replaceFirst('Bad state: ',''));}
+  try{
+   setState(()=>state=targeting?ArenaEngine.useAbility(state,selected!,target:i):ArenaEngine.play(state,i));
+   selected=null;targeting=false;
+   if(state.game.finished&&!_recorded){_recorded=true;MatchRepository.record(mode:'Arena local',xScore:state.game.xScore,oScore:state.game.oScore,moves:state.game.moves);}
+  }catch(e){message(e.toString().replaceFirst('Bad state: ',''));}
  }
  @override Widget build(BuildContext context){
   final g=state.game,p=g.turn,c=tint(p),winner=g.winner;
@@ -38,7 +43,7 @@ class _ArenaScreenState extends State<ArenaScreen>{
      Row(children:[const Expanded(child:Text('TACTICAL ABILITIES',style:TextStyle(fontSize:10,fontWeight:FontWeight.w900,letterSpacing:1))),Text(state.energyFor(p).toString()+'/6 ENERGY',style:TextStyle(color:c,fontWeight:FontWeight.w900,fontSize:10))]),
      const SizedBox(height:7),Wrap(spacing:6,runSpacing:6,children:ArenaAbility.values.map((a)=>SizedBox(width:(MediaQuery.sizeOf(context).width-34)/3,child:Material(color:Palette.panel,borderRadius:BorderRadius.circular(9),child:InkWell(onTap:g.finished?null:()=>ability(a),borderRadius:BorderRadius.circular(9),child:Container(padding:const EdgeInsets.symmetric(vertical:9,horizontal:5),decoration:BoxDecoration(borderRadius:BorderRadius.circular(9),border:Border.all(color:selected==a?Palette.cyan:Palette.line)),child:Column(children:[Text(a.title.toUpperCase(),style:const TextStyle(fontSize:9,fontWeight:FontWeight.w900)),Text(a.cost.toString()+' ENERGY',style:const TextStyle(color:Palette.muted,fontSize:8))])))))).toList()),
      if(targeting)TextButton(onPressed:()=>setState((){selected=null;targeting=false;}),child:const Text('CANCEL TARGET')),
-     if(g.finished) ...[const SizedBox(height:8),Text(winner==null?'A PERFECT DRAW':'PLAYER '+winner.symbol+' TAKES THE MATCH',style:const TextStyle(color:Palette.gold,fontSize:12,fontWeight:FontWeight.w900,letterSpacing:.7)),const SizedBox(height:8),FilledButton(onPressed:()=>setState(()=>state=ArenaState()),child:const Text('PLAY AGAIN'))],
+     if(g.finished) ...[const SizedBox(height:8),Text(winner==null?'A PERFECT DRAW':'PLAYER '+winner.symbol+' TAKES THE MATCH',style:const TextStyle(color:Palette.gold,fontSize:12,fontWeight:FontWeight.w900,letterSpacing:.7)),const SizedBox(height:8),FilledButton(onPressed:()=>setState(()=>{state=ArenaState(),_recorded=false,selected=null,targeting=false}),child:const Text('PLAY AGAIN'))],
     ]))
    ])));
  }
