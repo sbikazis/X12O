@@ -19,6 +19,16 @@ class MatchRecord {
   );
 }
 
+
+class DailyChallenge {
+  const DailyChallenge({required this.dateKey,required this.targetScore,required this.bestScore,required this.completed,required this.rewardXp});
+  final String dateKey;
+  final int targetScore,bestScore,rewardXp;
+  final bool completed;
+  int get progress => bestScore.clamp(0,targetScore).toInt();
+  double get progressRatio => (progress/targetScore).clamp(0.0,1.0);
+}
+
 class Achievement {
   const Achievement(this.title,this.description,this.unlocked);
   final String title,description;
@@ -37,6 +47,7 @@ class PlayerStats {
 abstract final class MatchRepository {
   static const _key='x12o.match_history.v1';
   static const _careerKey='x12o.career.v1';
+  static const _dailyKey='x12o.daily_challenge.v1';
 
   static Future<List<MatchRecord>> history() async {
     final prefs=await SharedPreferences.getInstance();
@@ -72,6 +83,11 @@ abstract final class MatchRepository {
     totals['points']=(totals['points']??0)+record.xScore;
     totals['best']=record.xScore>(totals['best']??0)?record.xScore:(totals['best']??0);
     totals['xp']=(totals['xp']??0)+record.xpEarned;
+    final challenge=_challengeForToday(_readDaily(prefs.getString(_dailyKey)));
+    final best=record.xScore>challenge.bestScore?record.xScore:challenge.bestScore;
+    final completed=challenge.completed||best>=challenge.targetScore;
+    if(!challenge.completed&&completed) totals['xp']=(totals['xp']??0)+challenge.rewardXp;
+    await prefs.setString(_dailyKey,jsonEncode({'date':challenge.dateKey,'best':best,'completed':completed}));
     await prefs.setString(_key,jsonEncode([record,...current].take(50).map((e)=>e.toJson()).toList()));
     await prefs.setString(_careerKey,jsonEncode(totals));
   }
@@ -82,6 +98,32 @@ abstract final class MatchRepository {
       final decoded=Map<String,dynamic>.from(jsonDecode(raw) as Map);
       return decoded.map((key,value)=>MapEntry(key,(value as num).toInt()));
     } catch (_) { return null; }
+  }
+
+  
+  static String _todayKey() {
+    final now=DateTime.now();
+    return now.year.toString()+'-'+now.month.toString().padLeft(2,'0')+'-'+now.day.toString().padLeft(2,'0');
+  }
+
+  static DailyChallenge _challengeForToday(Map<String,dynamic>? saved) {
+    final date=_todayKey();
+    final parts=date.split('-').map(int.parse).toList();
+    final dayOfYear=DateTime(parts[0],parts[1],parts[2]).difference(DateTime(parts[0])).inDays;
+    final target=3+(dayOfYear%3);
+    final valid=saved!=null&&saved['date']==date;
+    return DailyChallenge(dateKey:date,targetScore:target,bestScore:valid?(saved['best'] as num? ?? 0).toInt():0,
+      completed:valid?(saved['completed'] as bool? ?? false):false,rewardXp:50);
+  }
+
+  static Map<String,dynamic>? _readDaily(String? raw) {
+    if(raw==null||raw.isEmpty) return null;
+    try { return Map<String,dynamic>.from(jsonDecode(raw) as Map); } catch (_) { return null; }
+  }
+
+  static Future<DailyChallenge> dailyChallenge() async {
+    final prefs=await SharedPreferences.getInstance();
+    return _challengeForToday(_readDaily(prefs.getString(_dailyKey)));
   }
 
   static Future<PlayerStats> stats() async {
@@ -107,5 +149,6 @@ abstract final class MatchRepository {
     final prefs=await SharedPreferences.getInstance();
     await prefs.remove(_key);
     await prefs.remove(_careerKey);
+    await prefs.remove(_dailyKey);
   }
 }
