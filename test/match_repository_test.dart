@@ -7,10 +7,11 @@ void main(){
  setUp(()=>SharedPreferences.setMockInitialValues({}));
  group('Local match repository',(){
   test('stores a match and calculates career statistics and XP',()async{
+   final challenge=await MatchRepository.dailyChallenge();
    await MatchRepository.record(mode:'Classic local',xScore:4,oScore:2,moves:144,playedAt:DateTime(2026,11,28));
    final stats=await MatchRepository.stats();
    expect(stats.matches,1);expect(stats.wins,1);expect(stats.losses,0);expect(stats.points,4);expect(stats.winRate,100);
-   expect(stats.xp,68);expect(stats.level,1);expect(stats.levelProgress,68);
+   expect(stats.xp,68+(4>=challenge.targetScore?50:0));expect(stats.level,1);expect(stats.levelProgress,68);
    expect(stats.achievements.first.unlocked,isTrue);
    expect(stats.achievements[3].unlocked,isTrue);
    expect(stats.recent.single.mode,'Classic local');
@@ -36,7 +37,20 @@ void main(){
    final history=await MatchRepository.history();
    expect(history.length,50);expect(history.first.mode,'match 54');expect(history.last.mode,'match 5');
    final stats=await MatchRepository.stats();
-   expect(stats.matches,55);expect(stats.wins,55);expect(stats.xp,5080);
+   expect(stats.matches,55);expect(stats.wins,55);expect(stats.xp,6320);
+  });
+
+  test('daily challenge grants its bonus once and tracks best score',()async{
+   final challenge=await MatchRepository.dailyChallenge();
+   await MatchRepository.record(mode:'Classic',xScore:challenge.targetScore,oScore:0,moves:144);
+   final completed=await MatchRepository.dailyChallenge();
+   expect(completed.completed,isTrue);
+   expect(completed.bestScore,challenge.targetScore);
+   final afterFirst=await MatchRepository.stats();
+   await MatchRepository.record(mode:'Classic',xScore:challenge.targetScore+2,oScore:0,moves:144);
+   final afterSecond=await MatchRepository.stats();
+   expect(afterSecond.xp-afterFirst.xp,60+(challenge.targetScore+2)*2);
+   expect((await MatchRepository.dailyChallenge()).bestScore,challenge.targetScore+2);
   });
   test('clears local history',()async{
    await MatchRepository.record(mode:'test',xScore:1,oScore:0,moves:144);
