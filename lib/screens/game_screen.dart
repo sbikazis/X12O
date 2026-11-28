@@ -84,7 +84,7 @@ class _GameScreenState extends State<GameScreen> {
         const Text('The board is full. Every line counted.', textAlign: TextAlign.center, style: TextStyle(color: Palette.muted, fontSize: 12)),
       ]),
       actions: [
-        FilledButton(onPressed: () { Navigator.pop(dialogContext); setState(() { state = GameState(); _recorded = false; aiThinking = false; lastMovePoints = 0; lastMovePoints = 0; }); }, child: const Text('PLAY AGAIN')),
+        FilledButton(onPressed: () { Navigator.pop(dialogContext); setState(() { state = GameState(); _recorded = false; aiThinking = false; lastMovePoints = 0; }); }, child: const Text('PLAY AGAIN')),
         TextButton(onPressed: () { Navigator.pop(dialogContext); Navigator.pop(context); }, child: const Text('HOME')),
       ],
     ));
@@ -102,10 +102,10 @@ class _GameScreenState extends State<GameScreen> {
           if (widget.vsAi) PopupMenuButton<AiDifficulty>(
             tooltip: 'AI difficulty',
             icon: const Icon(Icons.tune_rounded),
-            onSelected: (value) => setState(() { difficulty = value; state = GameState(); _recorded = false; aiThinking = false; }),
+            onSelected: (value) => setState(() { difficulty = value; state = GameState(); _recorded = false; aiThinking = false; lastMovePoints = 0; }),
             itemBuilder: (_) => AiDifficulty.values.map((d) => PopupMenuItem(value: d, child: Text(d.name.toUpperCase() + (d == difficulty ? '  ✓' : '')))).toList(),
           ),
-          IconButton(onPressed: () => setState(() { state = GameState(); _recorded = false; aiThinking = false; }), icon: const Icon(Icons.refresh_rounded), tooltip: 'Restart'),
+          IconButton(onPressed: () => setState(() { state = GameState(); _recorded = false; aiThinking = false; lastMovePoints = 0; }), icon: const Icon(Icons.refresh_rounded), tooltip: 'Restart'),
         ],
       ),
       body: SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(13, 4, 13, 12), child: Column(children: [
