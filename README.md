@@ -37,4 +37,4 @@ Install Flutter and Android SDK, then run:
 4. **Social:** private rooms, invitations, matchmaking, server-authoritative matches and ranked seasons.
 5. **Release:** Arabic, English and French localization, privacy disclosures, store assets and device QA.
 
-Online multiplayer, daily challenges and online rankings are not active yet.
+Online multiplayer, private rooms, matchmaking and online rankings are not active yet. Daily challenges currently run locally on the device.
