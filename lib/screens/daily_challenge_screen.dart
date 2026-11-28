@@ -35,7 +35,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
             Row(children:[const Icon(Icons.workspace_premium_rounded,color:Palette.gold,size:22),const SizedBox(width:8),Text('+ ${challenge.rewardXp} XP REWARD',style:const TextStyle(fontWeight:FontWeight.w900,fontSize:11))]),
             const SizedBox(height:18),
             if(challenge.completed)const Row(children:[Icon(Icons.check_circle_rounded,color:Palette.cyan),SizedBox(width:8),Text('MISSION COMPLETE',style:TextStyle(color:Palette.cyan,fontWeight:FontWeight.w900,fontSize:11))])
-            else SizedBox(width:double.infinity,child:FilledButton.icon(onPressed:()=>Navigator.push(context,MaterialPageRoute<void>(builder:(_)=>const GameScreen())),icon:const Icon(Icons.sports_esports_rounded),label:const Text('PLAY CLASSIC'))),
+            else SizedBox(width:double.infinity,child:FilledButton.icon(onPressed:() async { await Navigator.push(context,MaterialPageRoute<void>(builder:(_)=>const GameScreen())); if(mounted)setState(_refresh); },icon:const Icon(Icons.sports_esports_rounded),label:const Text('PLAY CLASSIC'))),
           ])),
         const SizedBox(height:17),
         const Text('HOW IT WORKS',style:TextStyle(fontSize:11,fontWeight:FontWeight.w900,letterSpacing:1.2)),
