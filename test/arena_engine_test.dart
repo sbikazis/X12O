@@ -131,7 +131,7 @@ void main() {
       expect(state.scannerPenaltyPlayers, contains(Mark.x));
       state = ArenaEngine.play(state, 67);
       expect(state.xEnergy, 1);
-      expect(state.scannerPenaltyFor, isNull);
+      expect(state.scannerPenaltyPlayers, isEmpty);
     });
 
     test('scanner ignores blocked cells', () {
