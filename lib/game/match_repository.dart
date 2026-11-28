@@ -36,6 +36,8 @@ class PlayerStats {
 
 abstract final class MatchRepository {
   static const _key='x12o.match_history.v1';
+  static const _careerKey='x12o.career.v1';
+
   static Future<List<MatchRecord>> history() async {
     final prefs=await SharedPreferences.getInstance();
     final raw=prefs.getString(_key);
@@ -45,35 +47,65 @@ abstract final class MatchRepository {
       return decoded.map((e)=>MatchRecord.fromJson(Map<String,dynamic>.from(e as Map))).toList();
     } catch (_) { return const []; }
   }
-  static Future<void> record({required String mode,required int xScore,required int oScore,required int moves,DateTime? playedAt}) async {
-    final prefs=await SharedPreferences.getInstance();
-    final current=await history();
-    final record=MatchRecord(mode:mode,xScore:xScore,oScore:oScore,moves:moves,playedAt:playedAt??DateTime.now());
-    await prefs.setString(_key,jsonEncode([record,...current].take(50).map((e)=>e.toJson()).toList()));
-  }
-  static Future<PlayerStats> stats() async {
-    final recent=await history();
-    var wins=0,losses=0,draws=0,points=0,best=0,xp=0;
-    for(final match in recent){
+
+  static Map<String,int> _summarize(Iterable<MatchRecord> matches) {
+    var count=0,wins=0,losses=0,draws=0,points=0,best=0,xp=0;
+    for(final match in matches) {
+      count++;
       if(match.winner==Mark.x) wins++; else if(match.winner==Mark.o) losses++; else draws++;
       points+=match.xScore;
       if(match.xScore>best) best=match.xScore;
       xp+=match.xpEarned;
     }
+    return {'matches':count,'wins':wins,'losses':losses,'draws':draws,'points':points,'best':best,'xp':xp};
+  }
+
+  static Future<void> record({required String mode,required int xScore,required int oScore,required int moves,DateTime? playedAt}) async {
+    final prefs=await SharedPreferences.getInstance();
+    final current=await history();
+    final record=MatchRecord(mode:mode,xScore:xScore,oScore:oScore,moves:moves,playedAt:playedAt??DateTime.now());
+    final totals=_readCareer(prefs.getString(_careerKey))??_summarize(current);
+    totals['matches']=(totals['matches']??0)+1;
+    if(record.winner==Mark.x) totals['wins']=(totals['wins']??0)+1;
+    else if(record.winner==Mark.o) totals['losses']=(totals['losses']??0)+1;
+    else totals['draws']=(totals['draws']??0)+1;
+    totals['points']=(totals['points']??0)+record.xScore;
+    totals['best']=record.xScore>(totals['best']??0)?record.xScore:(totals['best']??0);
+    totals['xp']=(totals['xp']??0)+record.xpEarned;
+    await prefs.setString(_key,jsonEncode([record,...current].take(50).map((e)=>e.toJson()).toList()));
+    await prefs.setString(_careerKey,jsonEncode(totals));
+  }
+
+  static Map<String,int>? _readCareer(String? raw) {
+    if(raw==null||raw.isEmpty) return null;
+    try {
+      final decoded=Map<String,dynamic>.from(jsonDecode(raw) as Map);
+      return decoded.map((key,value)=>MapEntry(key,(value as num).toInt()));
+    } catch (_) { return null; }
+  }
+
+  static Future<PlayerStats> stats() async {
+    final prefs=await SharedPreferences.getInstance();
+    final recent=await history();
+    final totals=_readCareer(prefs.getString(_careerKey))??_summarize(recent);
+    final matches=totals['matches']??0,wins=totals['wins']??0,losses=totals['losses']??0;
+    final draws=totals['draws']??0,points=totals['points']??0,best=totals['best']??0,xp=totals['xp']??0;
     final level=xp~/100+1;
     final achievements=<Achievement>[
-      Achievement('FIRST MATCH','Complete your first match',recent.isNotEmpty),
-      Achievement('RISING RIVAL','Complete 5 matches',recent.length>=5),
-      Achievement('VETERAN','Complete 10 matches',recent.length>=10),
+      Achievement('FIRST MATCH','Complete your first match',matches>=1),
+      Achievement('RISING RIVAL','Complete 5 matches',matches>=5),
+      Achievement('VETERAN','Complete 10 matches',matches>=10),
       Achievement('FIRST VICTORY','Win your first match',wins>=1),
       Achievement('DOMINATOR','Win 5 matches',wins>=5),
       Achievement('CENTURY','Score 100 total points',points>=100),
     ];
-    return PlayerStats(recent.length,wins,losses,draws,points,best,List.unmodifiable(recent),
+    return PlayerStats(matches,wins,losses,draws,points,best,List.unmodifiable(recent),
       xp:xp,level:level,levelProgress:xp%100,achievements:List.unmodifiable(achievements));
   }
+
   static Future<void> clear() async {
     final prefs=await SharedPreferences.getInstance();
     await prefs.remove(_key);
+    await prefs.remove(_careerKey);
   }
 }
