@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../app.dart';
 import '../game/arena_engine.dart';
 import '../game/arena_abilities.dart';
 import '../game/game_state.dart';
+import '../game/game_engine.dart';
 import '../game/match_repository.dart';
 
 class ArenaScreen extends StatefulWidget {
@@ -14,6 +16,7 @@ class _ArenaScreenState extends State<ArenaScreen>{
  ArenaAbility? selected;
  bool targeting=false;
  bool _recorded=false;
+ int lastMovePoints=0;
  Color tint(Mark m)=>m==Mark.x?Palette.cyan:Palette.coral;
  void message(String s){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(s),duration:const Duration(seconds:2)));}
  void ability(ArenaAbility a){
@@ -24,8 +27,18 @@ class _ArenaScreenState extends State<ArenaScreen>{
  }
  void cell(int i){
   try{
-   setState(()=>state=targeting?ArenaEngine.useAbility(state,selected!,target:i):ArenaEngine.play(state,i));
-   selected=null;targeting=false;
+   if(targeting){
+    final next=ArenaEngine.useAbility(state,selected!,target:i);
+    setState((){state=next;selected=null;targeting=false;lastMovePoints=0;});
+    HapticFeedback.mediumImpact();
+   }else{
+    final player=state.game.turn;
+    final points=GameEngine.pointsForMove(List<Mark?>.of(state.game.board)..[i]=player,i,player);
+    final next=ArenaEngine.play(state,i);
+    setState((){state=next;lastMovePoints=points;});
+    HapticFeedback.selectionClick();
+    if(points>0)HapticFeedback.heavyImpact();
+   }
    if(state.game.finished&&!_recorded){_recorded=true;MatchRepository.record(mode:'Arena local',xScore:state.game.xScore,oScore:state.game.oScore,moves:state.game.moves);}
   }catch(e){message(e.toString().replaceFirst('Bad state: ',''));}
  }
@@ -38,12 +51,12 @@ class _ArenaScreenState extends State<ArenaScreen>{
      child:Row(children:[Icon(g.finished?Icons.emoji_events_rounded:Icons.bolt,color:g.finished?Palette.gold:c),const SizedBox(width:7),Expanded(child:Text(g.finished?(winner==null?'MATCH DRAW':'PLAYER '+winner.symbol+' WINS'):targeting?'TARGET: '+selected!.title.toUpperCase():'PLAYER '+p.symbol+' — YOUR TURN',style:const TextStyle(fontSize:10,fontWeight:FontWeight.w900))),Text(g.moves.toString()+'/144',style:const TextStyle(color:Palette.muted,fontSize:10))])),
     Expanded(child:Center(child:AspectRatio(aspectRatio:1,child:Container(margin:const EdgeInsets.all(7),padding:const EdgeInsets.all(5),decoration:BoxDecoration(color:Palette.panel,borderRadius:BorderRadius.circular(14),border:Border.all(color:Palette.line)),
      child:GridView.builder(physics:const NeverScrollableScrollPhysics(),itemCount:144,gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:12,crossAxisSpacing:3,mainAxisSpacing:3),
-      itemBuilder:(_,i){final m=g.board[i],blocked=state.blockedCells.contains(i),scan=state.scannerHints.contains(i),shield=state.protectedCells.contains(i);return GestureDetector(onTap:()=>cell(i),child:Container(decoration:BoxDecoration(color:blocked?Palette.coral.withValues(alpha:.2):m==null?Palette.panel2:tint(m).withValues(alpha:.14),borderRadius:BorderRadius.circular(4),border:Border.all(color:scan?Palette.gold:shield?Palette.cyan:g.lastMove==i?tint(m!):Palette.line,width:scan||shield||g.lastMove==i?1.2:.5)),child:Center(child:Text(blocked?'×':m?.symbol??(scan?'!':shield?'◆':''),style:TextStyle(fontSize:11,fontWeight:FontWeight.w900,color:blocked?Palette.coral:scan?Palette.gold:shield?Palette.cyan:m==null?Palette.muted:tint(m))))));}))))),
+      itemBuilder:(_,i){final m=g.board[i],blocked=state.blockedCells.contains(i),scan=state.scannerHints.contains(i),shield=state.protectedCells.contains(i);return GestureDetector(onTap:()=>cell(i),child:Container(decoration:BoxDecoration(color:blocked?Palette.coral.withValues(alpha:.2):m==null?Palette.panel2:tint(m).withValues(alpha:.14),borderRadius:BorderRadius.circular(4),border:Border.all(color:g.lastMove==i&&lastMovePoints>0?Palette.gold:scan?Palette.gold:shield?Palette.cyan:g.lastMove==i&&m!=null?tint(m):Palette.line,width:g.lastMove==i&&lastMovePoints>0?1.5:scan||shield||g.lastMove==i?1.2:.5)),child:Center(child:Text(blocked?'×':m?.symbol??(scan?'!':shield?'◆':''),style:TextStyle(fontSize:11,fontWeight:FontWeight.w900,color:blocked?Palette.coral:scan?Palette.gold:shield?Palette.cyan:m==null?Palette.muted:tint(m))))));}))))),
     Padding(padding:const EdgeInsets.fromLTRB(10,5,10,12),child:Column(children:[
      Row(children:[const Expanded(child:Text('TACTICAL ABILITIES',style:TextStyle(fontSize:10,fontWeight:FontWeight.w900,letterSpacing:1))),Text(state.energyFor(p).toString()+'/6 ENERGY',style:TextStyle(color:c,fontWeight:FontWeight.w900,fontSize:10))]),
      const SizedBox(height:7),Wrap(spacing:6,runSpacing:6,children:ArenaAbility.values.map((a)=>SizedBox(width:(MediaQuery.sizeOf(context).width-34)/3,child:Material(color:Palette.panel,borderRadius:BorderRadius.circular(9),child:InkWell(onTap:g.finished?null:()=>ability(a),borderRadius:BorderRadius.circular(9),child:Container(padding:const EdgeInsets.symmetric(vertical:9,horizontal:5),decoration:BoxDecoration(borderRadius:BorderRadius.circular(9),border:Border.all(color:selected==a?Palette.cyan:Palette.line)),child:Column(children:[Text(a.title.toUpperCase(),style:const TextStyle(fontSize:9,fontWeight:FontWeight.w900)),Text(a.cost.toString()+' ENERGY',style:const TextStyle(color:Palette.muted,fontSize:8))])))))).toList()),
      if(targeting)TextButton(onPressed:()=>setState((){selected=null;targeting=false;}),child:const Text('CANCEL TARGET')),
-     if(g.finished) ...[const SizedBox(height:8),Text(winner==null?'A PERFECT DRAW':'PLAYER '+winner.symbol+' TAKES THE MATCH',style:const TextStyle(color:Palette.gold,fontSize:12,fontWeight:FontWeight.w900,letterSpacing:.7)),const SizedBox(height:8),FilledButton(onPressed:(){setState((){state=ArenaState();_recorded=false;selected=null;targeting=false;});},child:const Text('PLAY AGAIN'))],
+     if(g.finished) ...[const SizedBox(height:8),Text(winner==null?'A PERFECT DRAW':'PLAYER '+winner.symbol+' TAKES THE MATCH',style:const TextStyle(color:Palette.gold,fontSize:12,fontWeight:FontWeight.w900,letterSpacing:.7)),const SizedBox(height:8),FilledButton(onPressed:(){setState((){state=ArenaState();_recorded=false;selected=null;targeting=false;lastMovePoints=0;});},child:const Text('PLAY AGAIN'))],
     ]))
    ])));
  }
