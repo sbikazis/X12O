@@ -113,7 +113,15 @@ void main() {
 
     test('scanner penalty follows its owner across the opponent turn', () {
       var state = ArenaEngine.useAbility(
-        ArenaState(xEnergy: 4, oEnergy: 2),
+        ArenaState(
+          game: GameState(
+            board: List<Mark?>.filled(144, null)..[65] = Mark.x,
+            turn: Mark.x,
+            moves: 1,
+          ),
+          xEnergy: 4,
+          oEnergy: 2,
+        ),
         ArenaAbility.scanner,
       );
       state = ArenaEngine.useAbility(state, ArenaAbility.shield, target: 65);
@@ -122,7 +130,7 @@ void main() {
       expect(state.oEnergy, 3);
       expect(state.scannerPenaltyFor, Mark.x);
       state = ArenaEngine.play(state, 67);
-      expect(state.xEnergy, 3);
+      expect(state.xEnergy, 1);
       expect(state.scannerPenaltyFor, isNull);
     });
 
