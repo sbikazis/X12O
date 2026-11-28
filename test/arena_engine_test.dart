@@ -108,7 +108,7 @@ void main() {
       expect(state.xEnergy, 1);
       state = ArenaEngine.play(state, 65);
       expect(state.xEnergy, 1);
-      expect(state.scannerPenaltyFor, isNull);
+      expect(state.scannerPenaltyPlayers, isEmpty);
     });
 
     test('scanner penalty follows its owner across the opponent turn', () {
@@ -128,7 +128,7 @@ void main() {
       expect(state.game.turn, Mark.o);
       state = ArenaEngine.play(state, 66);
       expect(state.oEnergy, 3);
-      expect(state.scannerPenaltyFor, Mark.x);
+      expect(state.scannerPenaltyPlayers, contains(Mark.x));
       state = ArenaEngine.play(state, 67);
       expect(state.xEnergy, 1);
       expect(state.scannerPenaltyFor, isNull);
