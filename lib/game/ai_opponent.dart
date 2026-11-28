@@ -22,7 +22,12 @@ abstract final class AiOpponent {
     var best = pool.first;
     var bestScore = -double.infinity;
     for (final index in pool) {
-      final score = _evaluate(state.board, index, state.turn);
+      final score = _evaluate(
+        state.board,
+        index,
+        state.turn,
+        defendImmediateThreats: difficulty == AiDifficulty.hard,
+      );
       if (score > bestScore || (score == bestScore && _centerDistance(index) < _centerDistance(best))) {
         best = index;
         bestScore = score;
@@ -35,12 +40,34 @@ abstract final class AiOpponent {
     return best;
   }
 
-  static double _evaluate(List<Mark?> board, int index, Mark mark) {
+  static double _evaluate(
+    List<Mark?> board,
+    int index,
+    Mark mark, {
+    bool defendImmediateThreats = false,
+  }) {
     final own = _windowPotential(board, index, mark);
     final block = _windowPotential(board, index, mark.other);
     final copy = List<Mark?>.of(board)..[index] = mark;
     final immediate = GameEngine.pointsForMove(copy, index, mark);
-    return immediate * 1000 + own * 1.0 + block * .92 - _centerDistance(index) * .015;
+    var urgentThreatPenalty = 0.0;
+    if (defendImmediateThreats) {
+      var opponentBestImmediate = 0;
+      for (var candidate = 0; candidate < GameEngine.cells; candidate++) {
+        if (copy[candidate] != null) continue;
+        final reply = List<Mark?>.of(copy)..[candidate] = mark.other;
+        final threat = GameEngine.pointsForMove(reply, candidate, mark.other);
+        if (threat > opponentBestImmediate) opponentBestImmediate = threat;
+      }
+      // A hard opponent treats an immediate enemy scoring move as urgent.
+      // Scoring two or more points can still outweigh blocking one point.
+      urgentThreatPenalty = opponentBestImmediate * 1100.0;
+    }
+    return immediate * 1000 +
+        own * 1.0 +
+        block * .92 -
+        urgentThreatPenalty -
+        _centerDistance(index) * .015;
   }
 
   static double _windowPotential(List<Mark?> board, int index, Mark mark) {
