@@ -11,6 +11,12 @@ void main(){
   test('swap converts opponent mark',(){var s=ArenaState(oEnergy:4);s=ArenaEngine.play(s,10);s=ArenaEngine.useAbility(s,ArenaAbility.swap,target:10);expect(s.game.board[10],Mark.o);});
   test('double move gives same player two placements',(){var s=ArenaEngine.useAbility(ArenaState(xEnergy:5),ArenaAbility.doubleMove);s=ArenaEngine.play(s,0);expect(s.game.turn,Mark.x);s=ArenaEngine.play(s,1);expect(s.game.turn,Mark.x);s=ArenaEngine.play(s,2);expect(s.game.turn,Mark.o);});
   test('scanner highlights opponent immediate scores',(){final b=List<Mark?>.filled(144,null)..[60]=Mark.o..[61]=Mark.o;var s=ArenaState(game:GameState(board:b,turn:Mark.x,moves:2));s=ArenaEngine.useAbility(s,ArenaAbility.scanner);expect(s.scannerHints,contains(62));});
+  test('blocking the final empty cell ends the Arena match',(){
+   final board=List<Mark?>.filled(144,Mark.x)..[143]=null;
+   final s=ArenaState(game:GameState(board:board,turn:Mark.o,moves:143),oEnergy:2);
+   final ended=ArenaEngine.useAbility(s,ArenaAbility.block,target:143);
+   expect(ended.game.finished,isTrue);
+  });
   test('rejects unaffordable abilities',(){expect(()=>ArenaEngine.useAbility(ArenaState(),ArenaAbility.erase,target:0),throwsStateError);});
  });
 }
