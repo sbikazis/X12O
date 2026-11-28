@@ -6,10 +6,13 @@ void main(){
  TestWidgetsFlutterBinding.ensureInitialized();
  setUp(()=>SharedPreferences.setMockInitialValues({}));
  group('Local match repository',(){
-  test('stores a match and calculates career statistics',()async{
+  test('stores a match and calculates career statistics and XP',()async{
    await MatchRepository.record(mode:'Classic local',xScore:4,oScore:2,moves:144,playedAt:DateTime(2026,11,28));
    final stats=await MatchRepository.stats();
    expect(stats.matches,1);expect(stats.wins,1);expect(stats.losses,0);expect(stats.points,4);expect(stats.winRate,100);
+   expect(stats.xp,68);expect(stats.level,1);expect(stats.levelProgress,68);
+   expect(stats.achievements.first.unlocked,isTrue);
+   expect(stats.achievements[3].unlocked,isTrue);
    expect(stats.recent.single.mode,'Classic local');
   });
   test('records draws and losses from the X player perspective',()async{
@@ -17,6 +20,16 @@ void main(){
    await MatchRepository.record(mode:'AI / hard',xScore:1,oScore:3,moves:144);
    final stats=await MatchRepository.stats();
    expect(stats.draws,1);expect(stats.losses,1);expect(stats.wins,0);
+   expect(stats.xp,95);
+  });
+  test('unlocks match milestones and advances levels',()async{
+   for(var i=0;i<10;i++){await MatchRepository.record(mode:'Classic',xScore:10,oScore:0,moves:144);}
+   final stats=await MatchRepository.stats();
+   expect(stats.level,8);
+   expect(stats.achievements[1].unlocked,isTrue);
+   expect(stats.achievements[2].unlocked,isTrue);
+   expect(stats.achievements[4].unlocked,isTrue);
+   expect(stats.achievements[5].unlocked,isTrue);
   });
   test('keeps only the latest 50 matches',()async{
    for(var i=0;i<55;i++){await MatchRepository.record(mode:'match $i',xScore:i,oScore:0,moves:i);}
