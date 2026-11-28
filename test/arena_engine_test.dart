@@ -103,6 +103,29 @@ void main() {
       expect(scanned.oEnergy, 2);
     });
 
+    test('scanner consumes the next placement energy regeneration', () {
+      var state = ArenaEngine.useAbility(ArenaState(), ArenaAbility.scanner);
+      expect(state.xEnergy, 1);
+      state = ArenaEngine.play(state, 65);
+      expect(state.xEnergy, 1);
+      expect(state.scannerPenaltyFor, isNull);
+    });
+
+    test('scanner penalty follows its owner across the opponent turn', () {
+      var state = ArenaEngine.useAbility(
+        ArenaState(xEnergy: 4, oEnergy: 2),
+        ArenaAbility.scanner,
+      );
+      state = ArenaEngine.useAbility(state, ArenaAbility.shield, target: 65);
+      expect(state.game.turn, Mark.o);
+      state = ArenaEngine.play(state, 66);
+      expect(state.oEnergy, 3);
+      expect(state.scannerPenaltyFor, Mark.x);
+      state = ArenaEngine.play(state, 67);
+      expect(state.xEnergy, 3);
+      expect(state.scannerPenaltyFor, isNull);
+    });
+
     test('scanner ignores blocked cells', () {
       final board = List<Mark?>.filled(144, null)
         ..[60] = Mark.o
