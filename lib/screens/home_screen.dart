@@ -4,6 +4,7 @@ import 'game_screen.dart';
 import 'arena_screen.dart';
 import 'rules_screen.dart';
 import 'profile_screen.dart';
+import 'daily_challenge_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -49,6 +50,8 @@ class HomeScreen extends StatelessWidget {
           const Text('A 12×12 battlefield. Every move matters. Every line changes the game.', style: TextStyle(color: Palette.muted, height: 1.5, fontSize: 14)),
           const SizedBox(height: 26),
           _HeroCard(onTap: () => _open(context, const GameScreen())),
+          const SizedBox(height: 20),
+          _DailyCard(onTap: () => _open(context, const DailyChallengeScreen())),
           const SizedBox(height: 27),
           const Text('YOUR ARENA', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.6, fontSize: 12)),
           const SizedBox(height: 13),
@@ -153,4 +156,16 @@ class _ModeCard extends StatelessWidget {
       ]),
     ),
   ));
+}
+
+class _DailyCard extends StatelessWidget {
+  const _DailyCard({required this.onTap});
+  final VoidCallback onTap;
+  @override Widget build(BuildContext context)=>Material(color:Palette.panel,borderRadius:BorderRadius.circular(17),child:InkWell(onTap:onTap,borderRadius:BorderRadius.circular(17),child:Container(
+    padding:const EdgeInsets.all(15),decoration:BoxDecoration(borderRadius:BorderRadius.circular(17),border:Border.all(color:Palette.gold.withValues(alpha:.28))),
+    child:Row(children:[Container(width:39,height:39,decoration:BoxDecoration(color:Palette.gold.withValues(alpha:.12),borderRadius:BorderRadius.circular(12)),child:const Icon(Icons.bolt_rounded,color:Palette.gold)),
+      const SizedBox(width:12),const Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('DAILY CHALLENGE',style:TextStyle(fontSize:10,fontWeight:FontWeight.w900,letterSpacing:1)),SizedBox(height:4),Text('A new mission. A fresh XP reward.',style:TextStyle(color:Palette.muted,fontSize:10))])),
+      const Text('+50 XP',style:TextStyle(color:Palette.gold,fontSize:10,fontWeight:FontWeight.w900)),const SizedBox(width:7),const Icon(Icons.chevron_right_rounded,color:Palette.muted)
+    ]),
+  )));
 }
