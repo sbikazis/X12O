@@ -38,7 +38,8 @@ void main(){
    final history=await MatchRepository.history();
    expect(history.length,50);expect(history.first.mode,'match 54');expect(history.last.mode,'match 5');
    final stats=await MatchRepository.stats();
-   expect(stats.matches,55);expect(stats.wins,54);expect(stats.xp,6295);
+   expect(stats.matches,55);expect(stats.wins,54);// Each match caps score-derived XP at 20 points; the daily bonus is +50.
+   expect(stats.xp,5105);
   });
 
   test('daily challenge grants its bonus once and tracks best score',()async{
