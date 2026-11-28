@@ -22,7 +22,8 @@ abstract final class ArenaEngine {
     final p=g.turn;
     final played=GameEngine.play(g,i);
     final bonus=s.doubleMoveFor==p&&!played.finished;
-    final next=GameState(board:played.board,turn:bonus?p:played.turn,xScore:played.xScore,oScore:played.oScore,moves:played.moves,finished:played.finished,lastMove:i);
+    final isFull=List<int>.generate(GameEngine.cells,(index)=>index).every((index)=>played.board[index]!=null||s.blockedCells.contains(index));
+    final next=GameState(board:played.board,turn:bonus?p:played.turn,xScore:played.xScore,oScore:played.oScore,moves:played.moves,finished:isFull,lastMove:i);
     return ArenaState(game:next,xEnergy:p==Mark.x?_regen(s.xEnergy):s.xEnergy,oEnergy:p==Mark.o?_regen(s.oEnergy):s.oEnergy,
       protectedCells:s.protectedCells,blockedCells:s.blockedCells,doubleMoveFor:bonus?null:s.doubleMoveFor);
   }
