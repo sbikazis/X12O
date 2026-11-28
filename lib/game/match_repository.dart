@@ -52,7 +52,7 @@ abstract final class MatchRepository {
     var count=0,wins=0,losses=0,draws=0,points=0,best=0,xp=0;
     for(final match in matches) {
       count++;
-      if(match.winner==Mark.x) wins++; else if(match.winner==Mark.o) losses++; else draws++;
+      if(match.winner==Mark.x) { wins++; } else if(match.winner==Mark.o) { losses++; } else { draws++; }
       points+=match.xScore;
       if(match.xScore>best) best=match.xScore;
       xp+=match.xpEarned;
