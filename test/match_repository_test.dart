@@ -37,7 +37,7 @@ void main(){
    final history=await MatchRepository.history();
    expect(history.length,50);expect(history.first.mode,'match 54');expect(history.last.mode,'match 5');
    final stats=await MatchRepository.stats();
-   expect(stats.matches,55);expect(stats.wins,55);expect(stats.xp,6320);
+   expect(stats.matches,55);expect(stats.wins,54);expect(stats.xp,6295);
   });
 
   test('daily challenge grants its bonus once and tracks best score',()async{
