@@ -23,6 +23,29 @@ void main() {
       expect(state.game.moves, 2);
     });
 
+    test('erasing a mark never removes points already earned', () {
+      final board = List<Mark?>.filled(144, null)
+        ..[0] = Mark.x
+        ..[1] = Mark.x
+        ..[2] = Mark.x;
+      final state = ArenaState(
+        game: GameState(
+          board: board,
+          turn: Mark.o,
+          xScore: 1,
+          moves: 3,
+        ),
+        oEnergy: 3,
+      );
+      final erased = ArenaEngine.useAbility(
+        state,
+        ArenaAbility.erase,
+        target: 0,
+      );
+      expect(erased.game.board[0], isNull);
+      expect(erased.game.xScore, 1);
+    });
+
     test('shield blocks erase', () {
       var state = ArenaState();
       state = ArenaEngine.play(state, 0);
