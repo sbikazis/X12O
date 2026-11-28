@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../app.dart';
 import '../game/ai_opponent.dart';
 import '../game/game_engine.dart';
@@ -16,11 +17,22 @@ class _GameScreenState extends State<GameScreen> {
   GameState state = GameState();
   bool aiThinking = false;
   bool _recorded = false;
+  int lastMovePoints = 0;
   AiDifficulty difficulty = AiDifficulty.medium;
 
   void _move(int index) {
     if (state.finished || state.board[index] != null || aiThinking || (widget.vsAi && state.turn == Mark.o)) return;
-    setState(() => state = GameEngine.play(state, index));
+    final movePoints = GameEngine.pointsForMove(
+      List<Mark?>.of(state.board)..[index] = state.turn,
+      index,
+      state.turn,
+    );
+    HapticFeedback.selectionClick();
+    if (movePoints > 0) HapticFeedback.mediumImpact();
+    setState(() {
+      state = GameEngine.play(state, index);
+      lastMovePoints = movePoints;
+    });
     if (state.finished) {
       Future<void>.delayed(const Duration(milliseconds: 420), () {
         if (mounted) _result();
@@ -35,8 +47,16 @@ class _GameScreenState extends State<GameScreen> {
     Future<void>.delayed(const Duration(milliseconds: 520), () {
       if (!mounted || state.finished || state.turn != Mark.o) return;
       final index = AiOpponent.chooseMove(state, difficulty: difficulty);
+      final movePoints = GameEngine.pointsForMove(
+        List<Mark?>.of(state.board)..[index] = state.turn,
+        index,
+        state.turn,
+      );
+      HapticFeedback.selectionClick();
+      if (movePoints > 0) HapticFeedback.mediumImpact();
       setState(() {
         state = GameEngine.play(state, index);
+        lastMovePoints = movePoints;
         aiThinking = false;
       });
       if (state.finished) {
@@ -64,7 +84,7 @@ class _GameScreenState extends State<GameScreen> {
         const Text('The board is full. Every line counted.', textAlign: TextAlign.center, style: TextStyle(color: Palette.muted, fontSize: 12)),
       ]),
       actions: [
-        FilledButton(onPressed: () { Navigator.pop(dialogContext); setState(() { state = GameState(); _recorded = false; aiThinking = false; }); }, child: const Text('PLAY AGAIN')),
+        FilledButton(onPressed: () { Navigator.pop(dialogContext); setState(() { state = GameState(); _recorded = false; aiThinking = false; lastMovePoints = 0; lastMovePoints = 0; }); }, child: const Text('PLAY AGAIN')),
         TextButton(onPressed: () { Navigator.pop(dialogContext); Navigator.pop(context); }, child: const Text('HOME')),
       ],
     ));
@@ -115,7 +135,7 @@ class _GameScreenState extends State<GameScreen> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: GameEngine.cells,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 12, crossAxisSpacing: 3, mainAxisSpacing: 3),
-              itemBuilder: (_, index) => _Cell(mark: state.board[index], last: state.lastMove == index, onTap: () => _move(index)),
+              itemBuilder: (_, index) => _Cell(mark: state.board[index], last: state.lastMove == index, scored: state.lastMove == index && lastMovePoints > 0, onTap: () => _move(index)),
             ),
           )),
         ))),
@@ -149,7 +169,16 @@ class _Score extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(isAi && mark == Mark.o ? 'X12O AI' : 'PLAYER ' + mark.symbol, style: const TextStyle(color: Palette.muted, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .7)),
-          Text(score.toString(), style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900, height: 1.1)),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 260),
+            transitionBuilder: (child, animation) =>
+                ScaleTransition(scale: animation, child: child),
+            child: Text(
+              score.toString(),
+              key: ValueKey<int>(score),
+              style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900, height: 1.1),
+            ),
+          ),
         ])),
         if (active) Icon(Icons.circle, size: 7, color: tint),
       ]),
@@ -158,8 +187,8 @@ class _Score extends StatelessWidget {
 }
 
 class _Cell extends StatelessWidget {
-  const _Cell({required this.mark, required this.last, required this.onTap});
-  final Mark? mark; final bool last; final VoidCallback onTap;
+  const _Cell({required this.mark, required this.last, required this.scored, required this.onTap});
+  final Mark? mark; final bool last; final bool scored; final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
     final tint = mark == Mark.x ? Palette.cyan : Palette.coral;
