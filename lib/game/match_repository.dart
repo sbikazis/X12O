@@ -66,9 +66,9 @@ abstract final class MatchRepository {
     final record=MatchRecord(mode:mode,xScore:xScore,oScore:oScore,moves:moves,playedAt:playedAt??DateTime.now());
     final totals=_readCareer(prefs.getString(_careerKey))??_summarize(current);
     totals['matches']=(totals['matches']??0)+1;
-    if(record.winner==Mark.x) totals['wins']=(totals['wins']??0)+1;
-    else if(record.winner==Mark.o) totals['losses']=(totals['losses']??0)+1;
-    else totals['draws']=(totals['draws']??0)+1;
+    if(record.winner==Mark.x) { totals['wins']=(totals['wins']??0)+1; }
+    else if(record.winner==Mark.o) { totals['losses']=(totals['losses']??0)+1; }
+    else { totals['draws']=(totals['draws']??0)+1; }
     totals['points']=(totals['points']??0)+record.xScore;
     totals['best']=record.xScore>(totals['best']??0)?record.xScore:(totals['best']??0);
     totals['xp']=(totals['xp']??0)+record.xpEarned;
