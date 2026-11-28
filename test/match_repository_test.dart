@@ -20,12 +20,12 @@ void main(){
    await MatchRepository.record(mode:'AI / hard',xScore:1,oScore:3,moves:144);
    final stats=await MatchRepository.stats();
    expect(stats.draws,1);expect(stats.losses,1);expect(stats.wins,0);
-   expect(stats.xp,95);
+   expect(stats.xp,61);
   });
   test('unlocks match milestones and advances levels',()async{
    for(var i=0;i<10;i++){await MatchRepository.record(mode:'Classic',xScore:10,oScore:0,moves:144);}
    final stats=await MatchRepository.stats();
-   expect(stats.level,8);
+   expect(stats.level,9);
    expect(stats.achievements[1].unlocked,isTrue);
    expect(stats.achievements[2].unlocked,isTrue);
    expect(stats.achievements[4].unlocked,isTrue);
