@@ -37,6 +37,22 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
             if(challenge.completed)const Row(children:[Icon(Icons.check_circle_rounded,color:Palette.cyan),SizedBox(width:8),Text('MISSION COMPLETE',style:TextStyle(color:Palette.cyan,fontWeight:FontWeight.w900,fontSize:11))])
             else SizedBox(width:double.infinity,child:FilledButton.icon(onPressed:() async { await Navigator.push(context,MaterialPageRoute<void>(builder:(_)=>const GameScreen())); if(mounted)setState(_refresh); },icon:const Icon(Icons.sports_esports_rounded),label:const Text('PLAY CLASSIC'))),
           ])),
+        const SizedBox(height:16),
+        Row(children:[
+          Expanded(child:Container(padding:const EdgeInsets.all(14),decoration:BoxDecoration(color:Palette.panel,borderRadius:BorderRadius.circular(14),border:Border.all(color:Palette.line)),child:Row(children:[
+            const Icon(Icons.local_fire_department_rounded,color:Palette.coral,size:22),const SizedBox(width:9),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+              const Text('CURRENT STREAK',style:TextStyle(color:Palette.muted,fontSize:8,fontWeight:FontWeight.w900,letterSpacing:.7)),
+              Text('${challenge.currentStreak} DAYS',style:const TextStyle(fontSize:15,fontWeight:FontWeight.w900)),
+            ])),
+          ]))),
+          const SizedBox(width:9),
+          Expanded(child:Container(padding:const EdgeInsets.all(14),decoration:BoxDecoration(color:Palette.panel,borderRadius:BorderRadius.circular(14),border:Border.all(color:Palette.line)),child:Row(children:[
+            const Icon(Icons.emoji_events_rounded,color:Palette.gold,size:22),const SizedBox(width:9),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+              const Text('PERSONAL BEST',style:TextStyle(color:Palette.muted,fontSize:8,fontWeight:FontWeight.w900,letterSpacing:.7)),
+              Text('${challenge.bestStreak} DAYS',style:const TextStyle(fontSize:15,fontWeight:FontWeight.w900)),
+            ])),
+          ]))),
+        ]),
         const SizedBox(height:17),
         const Text('HOW IT WORKS',style:TextStyle(fontSize:11,fontWeight:FontWeight.w900,letterSpacing:1.2)),
         const SizedBox(height:9),
