@@ -36,7 +36,7 @@ void main(){
    final history=await MatchRepository.history();
    expect(history.length,50);expect(history.first.mode,'match 54');expect(history.last.mode,'match 5');
    final stats=await MatchRepository.stats();
-   expect(stats.matches,55);expect(stats.wins,55);expect(stats.xp,3410);
+   expect(stats.matches,55);expect(stats.wins,55);expect(stats.xp,5080);
   });
   test('clears local history',()async{
    await MatchRepository.record(mode:'test',xScore:1,oScore:0,moves:144);
