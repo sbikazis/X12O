@@ -18,6 +18,8 @@ A premium hybrid strategy game built around a 12×12 XO battlefield.
 - Completed Classic, AI and Arena matches are saved locally on the device.
 - The profile shows match totals, X-side wins/losses/draws, win rate, points and recent results.
 - The local history keeps the latest 50 completed matches. It is not synced to a server or other devices.
+- Daily missions grant a one-time 50 XP reward, track consecutive completion streaks and preserve the personal best streak locally.
+- Seven-day and 30-day streak milestones unlock profile achievements.
 
 ## Technology
 Flutter and Dart, Android-first. Custom Material 3 identity with electric cyan, coral and warm-gold accents. Animated Flutter UI and a pure Dart rules engine isolated from presentation. Local persistence uses shared_preferences. Unit tests and GitHub Actions CI build the Android release APK.
