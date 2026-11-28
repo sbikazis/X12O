@@ -22,7 +22,7 @@ class _ArenaScreenState extends State<ArenaScreen>{
  void ability(ArenaAbility a){
   if(state.energyFor(state.game.turn)<a.cost){message('Not enough energy.');return;}
   if(a==ArenaAbility.scanner||a==ArenaAbility.doubleMove){
-   try{setState((){state=ArenaEngine.useAbility(state,a);lastMovePoints=0;});message(a==ArenaAbility.scanner?'Threat scan complete.':'Double move armed. Place twice.');}catch(e){message(e.toString());}
+   try{setState((){state=ArenaEngine.useAbility(state,a);selected=null;targeting=false;lastMovePoints=0;});message(a==ArenaAbility.scanner?'Threat scan complete.':'Double move armed. Place twice.');}catch(e){message(e.toString());}
   }else{setState((){selected=a;targeting=true;});message('Choose a target cell.');}
  }
  void cell(int i){
