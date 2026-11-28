@@ -47,9 +47,9 @@ abstract final class MatchRepository {
     final recent=await history();
     var wins=0,losses=0,draws=0,points=0,best=0;
     for(final match in recent){
-      if(match.winner==Mark.x)wins++;else if(match.winner==Mark.o)losses++;else draws++;
+      if(match.winner==Mark.x) { wins++; } else if(match.winner==Mark.o) { losses++; } else { draws++; }
       points+=match.xScore;
-      if(match.xScore>best)best=match.xScore;
+      if(match.xScore>best) { best=match.xScore; }
     }
     return PlayerStats(recent.length,wins,losses,draws,points,best,List.unmodifiable(recent));
   }
