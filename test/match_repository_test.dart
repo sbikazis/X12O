@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:x12o/game/match_repository.dart';
@@ -53,6 +54,29 @@ void main(){
    final afterSecond=await MatchRepository.stats();
    expect(afterSecond.xp-afterFirst.xp,60+(challenge.targetScore+2)*2);
    expect((await MatchRepository.dailyChallenge()).bestScore,challenge.targetScore+2);
+  });
+  test('daily streak increments on consecutive mission completions',()async{
+   final challenge=await MatchRepository.dailyChallenge();
+   final today=DateTime.parse(challenge.dateKey);
+   final yesterday=DateTime(today.year,today.month,today.day).subtract(const Duration(days:1));
+   final yesterdayKey='${yesterday.year}-${yesterday.month.toString().padLeft(2,'0')}-${yesterday.day.toString().padLeft(2,'0')}';
+   final prefs=await SharedPreferences.getInstance();
+   await prefs.setString('x12o.daily_streak.v1',jsonEncode({'lastDate':yesterdayKey,'current':3,'best':4}));
+   await MatchRepository.record(mode:'Classic',xScore:challenge.targetScore,oScore:0,moves:144);
+   final updated=await MatchRepository.dailyChallenge();
+   expect(updated.currentStreak,4);
+   expect(updated.bestStreak,4);
+  });
+  test('missed daily missions reset the active streak but preserve the record',()async{
+   final challenge=await MatchRepository.dailyChallenge();
+   final today=DateTime.parse(challenge.dateKey);
+   final twoDaysAgo=DateTime(today.year,today.month,today.day).subtract(const Duration(days:2));
+   final oldKey='${twoDaysAgo.year}-${twoDaysAgo.month.toString().padLeft(2,'0')}-${twoDaysAgo.day.toString().padLeft(2,'0')}';
+   final prefs=await SharedPreferences.getInstance();
+   await prefs.setString('x12o.daily_streak.v1',jsonEncode({'lastDate':oldKey,'current':5,'best':7}));
+   final current=await MatchRepository.dailyChallenge();
+   expect(current.currentStreak,0);
+   expect(current.bestStreak,7);
   });
   test('clears local history',()async{
    await MatchRepository.record(mode:'test',xScore:1,oScore:0,moves:144);
