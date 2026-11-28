@@ -49,7 +49,7 @@ abstract final class ArenaEngine {
       }
     }
     final remaining=energy-a.cost;
-    return ArenaState(game:GameState(board:board,turn:p.other,xScore:g.xScore,oScore:g.oScore,moves:moveCount,finished:false,lastMove:g.lastMove),
+    return ArenaState(game:GameState(board:board,turn:p.other,xScore:g.xScore,oScore:g.oScore,moves:moveCount,finished:List<int>.generate(GameEngine.cells,(index)=>index).every((index)=>board[index]!=null||blocked.contains(index)),lastMove:g.lastMove),
       xEnergy:p==Mark.x?remaining:s.xEnergy,oEnergy:p==Mark.o?remaining:s.oEnergy,protectedCells:shield,blockedCells:blocked,doubleMoveFor:bonus,scannerHints:hints);
   }
 }
